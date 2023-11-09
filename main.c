@@ -92,6 +92,7 @@ sm_ag_if_wr_t fill_slice_sm_ctrl_req(uint16_t ran_func_id, slice_ctrl_msg_e type
     if (type == SLICE_CTRL_SM_V0_DEL) {
       /// DEL ///
       wr.slice_req_ctrl.msg.type = SLICE_CTRL_SM_V0_DEL;
+	  printf("Filling DEL Slice\n");
       fill_del_slice(&wr.slice_req_ctrl.msg.u.del_slice);
     } else {
       assert(0 != 0 && "Unknown slice ctrl type");
@@ -125,22 +126,29 @@ int main(int argc, char* argv[]){
 	// returns a handle
 	sm_ans_xapp_t report_handle = report_sm_xapp_api(&nodes.n[0].id, nodes.n[0].ack_rf[0].id, inter, &sm_callback);
 	
+	sleep(2);
+
 	// Remove the handle previously returned
 	rm_report_sm_xapp_api(report_handle.u.handle);
 
 	printf("***Creating another handler for the control message***\n");
-	printf("Slice: %d\n\n", SLICE_STATS_V0);
-	// returns a handle
-	sm_ans_xapp_t report_handle_control = report_sm_xapp_api(&nodes.n[0].id, nodes.n[0].ack_rf[0].id, inter, &sm_cb_slice);
-
+	uint16_t func_id = nodes.n[0].ack_rf[1].id;
+	printf("Slice: %d\n", SLICE_STATS_V0);
+	printf("SM: %d\n\n", func_id);
 	sleep(10);
+	// // returns a handle
+	// sm_ans_xapp_t report_handle_control = report_sm_xapp_api(&nodes.n[0].id, func_id, inter, &sm_cb_slice);
+
+	// sleep(10);
+	printf("Create control msg\n");
 	// Control DEL slice
     sm_ag_if_wr_t ctrl_msg_del = fill_slice_sm_ctrl_req(SM_SLICE_ID, SLICE_CTRL_SM_V0_DEL);
     control_sm_xapp_api(&nodes.n[0].id, SM_SLICE_ID, &ctrl_msg_del);
+	sleep(10);
     free_slice_ctrl_msg(&ctrl_msg_del.slice_req_ctrl.msg);
-	sleep(20);
-	// Remove the handle previously returned
-	rm_report_sm_xapp_api(report_handle_control.u.handle);
+	// sleep(20);
+	// // Remove the handle previously returned
+	// rm_report_sm_xapp_api(report_handle_control.u.handle);
 
 
 	while(try_stop_xapp_api()==false){
